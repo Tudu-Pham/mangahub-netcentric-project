@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MangaHub — Read, track, discuss</title>
+    <meta
+      name="description"
+      content="MangaHub is your place to browse series, save progress, and chat with readers."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Outfit:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <div class="shell header-inner">
+        <a class="brand" href="index.html">
+          <span class="brand-mark" aria-hidden="true">MH</span>
+          <span class="brand-text">MangaHub</span>
+        </a>
+
+        <button
+          class="nav-toggle"
+          type="button"
+          aria-expanded="false"
+          aria-controls="site-nav"
+        >
+          <span class="nav-toggle-bar" aria-hidden="true"></span>
+          <span class="visually-hidden">Menu</span>
+        </button>
+
+        <nav id="site-nav" class="site-nav" aria-label="Primary">
+          <ul class="nav-list">
+            <li><a href="#browse">Browse</a></li>
+            <li><a href="#trending">Trending</a></li>
+            <li><a href="chat.html">Community chat</a></li>
+          </ul>
+          <div class="nav-actions">
+            <a class="btn btn-ghost" href="#sign-in">Sign in</a>
+            <a class="btn btn-primary" href="#join">Join</a>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero">
+        <div class="shell hero-grid">
+          <div class="hero-copy">
+            <p class="eyebrow">Net-centric manga hub</p>
+            <h1>Your shelf, synced everywhere.</h1>
+            <p class="lede">
+              Track chapters, pick up where you left off, and jump into live
+              discussion—built for readers who never stop at “just one more.”
+            </p>
+            <div class="hero-cta">
+              <a class="btn btn-primary btn-lg" href="#browse">Start browsing</a>
+              <a class="btn btn-ghost btn-lg" href="#how">How it works</a>
+            </div>
+            <dl class="hero-stats" aria-label="Highlights">
+              <div>
+                <dt>Series</dt>
+                <dd>Curated catalog</dd>
+              </div>
+              <div>
+                <dt>Progress</dt>
+                <dd>Per-device sync</dd>
+              </div>
+              <div>
+                <dt>Chat</dt>
+                <dd>Real-time rooms</dd>
+              </div>
+            </dl>
+          </div>
+          <div class="hero-panel" aria-hidden="true">
+            <div class="hero-card">
+              <span class="hero-card-tag">Now reading</span>
+              <p class="hero-card-title">Midnight Alley</p>
+              <p class="hero-card-meta">Ch. 42 · Updated today</p>
+              <div class="hero-card-bar" role="presentation">
+                <span style="width: 68%"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="how" class="section section-alt">
+        <div class="shell">
+          <h2 class="section-title">How MangaHub fits your flow</h2>
+          <ul class="steps">
+            <li>
+              <span class="step-num">1</span>
+              <h3>Browse</h3>
+              <p>Search titles, tags, and status—fast lists without clutter.</p>
+            </li>
+            <li>
+              <span class="step-num">2</span>
+              <h3>Track</h3>
+              <p>Bookmark chapters and resume on any client connected to the hub.</p>
+            </li>
+            <li>
+              <span class="step-num">3</span>
+              <h3>Discuss</h3>
+              <p>Open the community chat for spoilers, recs, and release-week hype.</p>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="trending" class="section">
+        <div class="shell section-head">
+          <h2 class="section-title">Trending this week</h2>
+          <a class="text-link" href="#browse">View all</a>
+        </div>
+        <div class="shell card-row">
+          <article class="manga-card">
+            <div class="manga-cover c1"></div>
+            <h3 class="manga-title">Cinder &amp; Rail</h3>
+            <p class="manga-meta">Fantasy · Ongoing</p>
+          </article>
+          <article class="manga-card">
+            <div class="manga-cover c2"></div>
+            <h3 class="manga-title">Paper Tigers</h3>
+            <p class="manga-meta">Slice of life · Complete</p>
+          </article>
+          <article class="manga-card">
+            <div class="manga-cover c3"></div>
+            <h3 class="manga-title">Signal Lost</h3>
+            <p class="manga-meta">Sci-fi · Hiatus</p>
+          </article>
+          <article class="manga-card">
+            <div class="manga-cover c4"></div>
+            <h3 class="manga-title">River Ghost</h3>
+            <p class="manga-meta">Horror · Ongoing</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="browse" class="section section-alt">
+        <div class="shell">
+          <h2 class="section-title">Browse the shelf</h2>
+          <p class="section-lede">
+            Placeholder grid for your API—swap these blocks for live covers and
+            chapter counts from your backend.
+          </p>
+          <div class="browse-grid">
+            <article class="browse-card">
+              <h3>Shonen sprint</h3>
+              <p>High-energy series with weekly-style pacing.</p>
+              <a class="text-link" href="#">Open category</a>
+            </article>
+            <article class="browse-card">
+              <h3>Seinen nights</h3>
+              <p>Mature themes, slower burns, sharp dialogue.</p>
+              <a class="text-link" href="#">Open category</a>
+            </article>
+            <article class="browse-card">
+              <h3>Romance &amp; comedy</h3>
+              <p>Will-they-won’t-they with perfect timing.</p>
+              <a class="text-link" href="#">Open category</a>
+            </article>
+            <article class="browse-card">
+              <h3>Isekai &amp; portal fantasy</h3>
+              <p>New worlds, old regrets, bigger stakes.</p>
+              <a class="text-link" href="#">Open category</a>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="sign-in" class="section cta-band">
+        <div class="shell cta-inner">
+          <div>
+            <h2 class="cta-title">Ready when you are</h2>
+            <p class="cta-copy">
+              Wire this section to your auth service—JWT, sessions, or SSO.
+            </p>
+          </div>
+          <div class="cta-actions" id="join">
+            <a class="btn btn-primary btn-lg" href="#">Create account</a>
+            <a class="btn btn-ghost btn-lg" href="#">Sign in</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="shell footer-inner">
+        <p class="footer-brand">MangaHub</p>
+        <p class="footer-note">
+          Demo front-end for your net-centric project—pair with REST, gRPC, or WebSocket
+          backends.
+        </p>
+        <p class="footer-copy">&copy; <span id="year"></span> MangaHub</p>
+      </div>
+    </footer>
+
+    <script src="main.js" defer></script>
+  </body>
+</html>
