@@ -3,14 +3,36 @@ package main
 import (
 	"log"
 
+	"mangahub/internal/auth"
+	"mangahub/internal/manga"
 	"mangahub/pkg/database"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	log.Println("Starting MangaHub server...")
+	db, err := database.Connect()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
 
-	database.Connect()
-	database.Migrate()
+	if err := database.Migrate(db); err != nil {
+		log.Fatal(err)
+	}
 
-	log.Println("Project setup completed successfully")
+	r := gin.Default()
+
+	r.GET("/ping", func(c *gin.Context) {
+		c.JSON(200, gin.H{"message": "pong"})
+	})
+
+	mangaHandler := manga.NewHandler(db)
+	mangaHandler.RegisterRoutes(r)
+
+	authHandler := auth.NewHandler(db)
+	authHandler.RegisterRoutes(r)
+
+	log.Println("Server running at http://localhost:8080")
+	r.Run(":8080")
 }
