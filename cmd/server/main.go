@@ -4,8 +4,10 @@ import (
 	"log"
 
 	"mangahub/internal/auth"
+	"mangahub/internal/grpc"
 	"mangahub/internal/manga"
 	"mangahub/internal/tcp"
+	"mangahub/internal/udp"
 	"mangahub/internal/user"
 	ws "mangahub/internal/websocket"
 	"mangahub/pkg/database"
@@ -43,8 +45,14 @@ func main() {
 	authHandler := auth.NewHandler(db)
 	authHandler.RegisterRoutes(r)
 
-	userHandler := user.NewHandler(db, tcpServer)
+	udpServer := udp.NewServer(":7070")
+	udpServer.Start()
+
+	userHandler := user.NewHandler(db, tcpServer, udpServer)
 	userHandler.RegisterRoutes(r)
+
+	grpcServer := grpc.NewServer(db)
+	go grpcServer.Start()
 
 	r.GET("/me", auth.AuthMiddleware(), func(c *gin.Context) {
 		userID := c.GetString("user_id")

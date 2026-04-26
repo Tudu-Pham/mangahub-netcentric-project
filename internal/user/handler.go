@@ -6,6 +6,7 @@ import (
 
 	"mangahub/internal/auth"
 	"mangahub/internal/tcp"
+	"mangahub/internal/udp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,12 +14,14 @@ import (
 type Handler struct {
 	DB        *sql.DB
 	TCPServer *tcp.Server
+	UDPServer *udp.Server
 }
 
-func NewHandler(db *sql.DB, tcpServer *tcp.Server) *Handler {
+func NewHandler(db *sql.DB, tcpServer *tcp.Server, udpServer *udp.Server) *Handler {
 	return &Handler{
 		DB:        db,
 		TCPServer: tcpServer,
+		UDPServer: udpServer,
 	}
 }
 
@@ -132,6 +135,14 @@ func (h *Handler) UpdateProgress(c *gin.Context) {
 	}
 
 	h.TCPServer.BroadcastCh <- tcp.NewProgressUpdate(userID, req.MangaID, req.CurrentChapter)
+
+	h.UDPServer.SendNotification(
+		udp.Notification{
+			Type:    "progress_update",
+			Message: "User updated reading progress",
+		},
+		"127.0.0.1:9999", // client port
+	)
 
 	c.JSON(200, gin.H{
 		"message": "progress updated",
