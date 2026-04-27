@@ -109,29 +109,111 @@ func (h *Handler) GetLibrary(c *gin.Context) {
 
 	c.JSON(http.StatusOK, library)
 }
-
 func (h *Handler) UpdateProgress(c *gin.Context) {
 	userID := c.GetString("user_id")
-
-	var req struct {
-		MangaID        string `json:"manga_id"`
-		CurrentChapter int    `json:"current_chapter"`
-	}
-
-	if err := c.BindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid input"})
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "unauthorized",
+		})
 		return
 	}
 
-	// update progress
-	_, err := h.DB.Exec(`
+	var req struct {
+		MangaID        string `json:"manga_id" binding:"required"`
+		CurrentChapter int    `json:"current_chapter" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid input",
+		})
+		return
+	}
+
+	if req.CurrentChapter <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "current_chapter must be greater than 0",
+		})
+		return
+	}
+
+	var totalChapters int
+
+	err := h.DB.QueryRow(`
+		SELECT total_chapters
+		FROM manga
+		WHERE id = ?
+	`, req.MangaID).Scan(&totalChapters)
+
+	if err == sql.ErrNoRows {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "manga not found",
+		})
+		return
+	}
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	if totalChapters > 0 && req.CurrentChapter > totalChapters {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":          "current_chapter exceeds total chapters",
+			"total_chapters": totalChapters,
+		})
+		return
+	}
+
+	var exists int
+
+	err = h.DB.QueryRow(`
+		SELECT COUNT(*)
+		FROM user_progress
+		WHERE user_id = ? AND manga_id = ?
+	`, userID, req.MangaID).Scan(&exists)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	if exists == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "manga is not in your library. Please add it first",
+		})
+		return
+	}
+
+	result, err := h.DB.Exec(`
 		UPDATE user_progress
 		SET current_chapter = ?, updated_at = CURRENT_TIMESTAMP
 		WHERE user_id = ? AND manga_id = ?
 	`, req.CurrentChapter, userID, req.MangaID)
 
 	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	if rowsAffected == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "progress was not updated",
+		})
 		return
 	}
 
@@ -142,10 +224,12 @@ func (h *Handler) UpdateProgress(c *gin.Context) {
 			Type:    "progress_update",
 			Message: "User updated reading progress",
 		},
-		"127.0.0.1:9999", // client port
+		"127.0.0.1:9999",
 	)
 
-	c.JSON(200, gin.H{
-		"message": "progress updated",
+	c.JSON(http.StatusOK, gin.H{
+		"message":         "progress updated",
+		"manga_id":        req.MangaID,
+		"current_chapter": req.CurrentChapter,
 	})
 }

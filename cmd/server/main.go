@@ -61,22 +61,6 @@ func main() {
 		})
 	})
 
-	r.GET("/seed", func(c *gin.Context) {
-		_, err := db.Exec(`
-	INSERT OR IGNORE INTO manga (id, title, author, genres, status, total_chapters, description)
-	VALUES 
-	('one-piece', 'One Piece', 'Oda Eiichiro', 'Action,Adventure,Shounen', 'ongoing', 1100, 'Pirate adventure'),
-	('naruto', 'Naruto', 'Masashi Kishimoto', 'Action,Shounen', 'completed', 700, 'Ninja story'),
-	('death-note', 'Death Note', 'Tsugumi Ohba', 'Mystery,Psychological', 'completed', 108, 'Notebook kills people');
-	`)
-		if err != nil {
-			c.JSON(500, gin.H{"error": err.Error()})
-			return
-		}
-
-		c.JSON(200, gin.H{"message": "seed data inserted"})
-	})
-
 	log.Println("Server running at http://localhost:8080")
 	r.Run(":8080")
 }
