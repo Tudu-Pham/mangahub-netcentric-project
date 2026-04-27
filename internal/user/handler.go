@@ -49,7 +49,8 @@ func (h *Handler) AddToLibrary(c *gin.Context) {
 	}
 
 	_, err := h.DB.Exec(`
-		INSERT INTO user_progress (user_id, manga_id, current_chapter, status)
+		INSERT OR REPLACE INTO user_progress 
+		(user_id, manga_id, current_chapter, status) 
 		VALUES (?, ?, ?, ?)
 	`, userID, req.MangaID, req.CurrentChapter, req.Status)
 
