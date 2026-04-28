@@ -1,7 +1,9 @@
 package websocket
 
 import (
+	"database/sql"
 	"log"
+	"mangahub/internal/auth"
 	"net/http"
 	"time"
 
@@ -24,14 +26,16 @@ type Client struct {
 }
 
 type Server struct {
+	DB         *sql.DB
 	clients    map[*websocket.Conn]*Client
 	broadcast  chan ChatMessage
 	register   chan *Client
 	unregister chan *Client
 }
 
-func NewServer() *Server {
+func NewServer(db *sql.DB) *Server {
 	return &Server{
+		DB:         db,
 		clients:    make(map[*websocket.Conn]*Client),
 		broadcast:  make(chan ChatMessage, 100),
 		register:   make(chan *Client),
@@ -99,15 +103,44 @@ func (s *Server) HandleConnection(c *gin.Context) {
 		return
 	}
 
-	userID := c.Query("user_id")
-	username := c.Query("username")
-
-	if userID == "" {
-		userID = "guest"
+	tokenString := c.Query("token")
+	if tokenString == "" {
+		conn.WriteJSON(ChatMessage{
+			Type:      "error",
+			Message:   "missing token",
+			Timestamp: time.Now().Unix(),
+		})
+		conn.Close()
+		return
 	}
 
-	if username == "" {
-		username = "Anonymous"
+	userID, err := auth.ValidateToken(tokenString)
+	if err != nil {
+		conn.WriteJSON(ChatMessage{
+			Type:      "error",
+			Message:   "invalid token",
+			Timestamp: time.Now().Unix(),
+		})
+		conn.Close()
+		return
+	}
+
+	var username string
+	err = s.DB.QueryRow(`
+		SELECT username
+		FROM users
+		WHERE id = ?
+	`, userID).Scan(&username)
+
+	if err != nil {
+		conn.WriteJSON(ChatMessage{
+			Type:      "error",
+			UserID:    userID,
+			Message:   "user not found",
+			Timestamp: time.Now().Unix(),
+		})
+		conn.Close()
+		return
 	}
 
 	client := &Client{

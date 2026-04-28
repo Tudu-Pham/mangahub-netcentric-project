@@ -649,16 +649,18 @@ WebSocket is used for real-time chat. When a user joins, the server broadcasts a
 
 Use Postman WebSocket request or another WebSocket client.
 
-Client 1:
+First, log in via HTTP (`POST /auth/login`) and copy the JWT token.
+
+Client 1 (authenticated):
 
 ```text
-ws://localhost:8080/ws/chat?user_id=u1&username=duc
+ws://localhost:8080/ws/chat?token=JWT_TOKEN_USER_1
 ```
 
-Client 2:
+Client 2 (authenticated):
 
 ```text
-ws://localhost:8080/ws/chat?user_id=u2&username=nam
+ws://localhost:8080/ws/chat?token=JWT_TOKEN_USER_2
 ```
 
 When Client 2 connects, Client 1 should receive:
@@ -666,9 +668,9 @@ When Client 2 connects, Client 1 should receive:
 ```json
 {
   "type": "join",
-  "user_id": "u2",
-  "username": "nam",
-  "message": "nam joined the chat",
+  "user_id": "USER_ID_2",
+  "username": "username_from_db_2",
+  "message": "username_from_db_2 joined the chat",
   "timestamp": 1710000000
 }
 ```
@@ -690,8 +692,8 @@ All connected clients should receive:
 ```json
 {
   "type": "chat",
-  "user_id": "u1",
-  "username": "duc",
+  "user_id": "USER_ID_1",
+  "username": "username_from_db_1",
   "message": "hello everyone",
   "timestamp": 1710000000
 }
@@ -706,9 +708,9 @@ When a client disconnects, the remaining clients should receive:
 ```json
 {
   "type": "left",
-  "user_id": "u2",
-  "username": "nam",
-  "message": "nam left the chat",
+  "user_id": "USER_ID_2",
+  "username": "username_from_db_2",
+  "message": "username_from_db_2 left the chat",
   "timestamp": 1710000000
 }
 ```

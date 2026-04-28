@@ -186,13 +186,13 @@ Success response:
 ### 4.1 Seed Sample Manga Data
 
 ```http
-GET /seed
+GET /seed/manga
 ```
 
 Full URL:
 
 ```text
-http://localhost:8080/seed
+http://localhost:8080/seed/manga
 ```
 
 This endpoint inserts sample manga records into the database.
@@ -201,7 +201,7 @@ Success response:
 
 ```json
 {
-  "message": "seed data inserted"
+  "message": "manga data seeded successfully"
 }
 ```
 
@@ -218,29 +218,6 @@ http://localhost:8080/manga
 ```
 
 Success response:
-
-```json
-[
-  {
-    "id": "one-piece",
-    "title": "One Piece",
-    "author": "Oda Eiichiro"
-  },
-  {
-    "id": "naruto",
-    "title": "Naruto",
-    "author": "Masashi Kishimoto"
-  }
-]
-```
-
-If the search/filter version is enabled, this endpoint may also support query parameters:
-
-```http
-GET /manga?q=one&genre=Action&status=ongoing&page=1&limit=10
-```
-
-Recommended response format for the search/filter version:
 
 ```json
 {
@@ -575,14 +552,18 @@ Purpose:
 Connect using Postman WebSocket or another WebSocket client:
 
 ```text
-ws://localhost:8080/ws/chat
+ws://localhost:8080/ws/chat?token=<JWT_TOKEN>
 ```
 
-Basic message body:
+Notes:
+
+- The WebSocket endpoint requires a valid JWT token passed as a `token` query parameter.
+- The server derives `user_id` from the token and looks up `username` from the `users` table.
+
+Client message body:
 
 ```json
 {
-  "username": "duc",
   "message": "hello everyone"
 }
 ```
@@ -591,60 +572,36 @@ Broadcast response:
 
 ```json
 {
-  "username": "duc",
-  "message": "hello everyone",
-  "timestamp": 1710000000
-}
-```
-
-### 8.2 Recommended Enhanced Chat Format
-
-If user identification is enabled, connect with query parameters:
-
-```text
-ws://localhost:8080/ws/chat?user_id=u1&username=duc
-```
-
-Recommended chat message:
-
-```json
-{
-  "message": "hello everyone"
-}
-```
-
-Recommended server broadcast:
-
-```json
-{
   "type": "chat",
-  "user_id": "u1",
-  "username": "duc",
+  "user_id": "USER_ID_HERE",
+  "username": "username_from_db",
   "message": "hello everyone",
   "timestamp": 1710000000
 }
 ```
 
-Recommended join event:
+### 8.2 Join / Left Events
+
+Join event (broadcast when a client connects):
 
 ```json
 {
   "type": "join",
-  "user_id": "u1",
-  "username": "duc",
-  "message": "duc joined the chat",
+  "user_id": "USER_ID_HERE",
+  "username": "username_from_db",
+  "message": "username_from_db joined the chat",
   "timestamp": 1710000000
 }
 ```
 
-Recommended left event:
+Left event (broadcast when a client disconnects):
 
 ```json
 {
   "type": "left",
-  "user_id": "u1",
-  "username": "duc",
-  "message": "duc left the chat",
+  "user_id": "USER_ID_HERE",
+  "username": "username_from_db",
+  "message": "username_from_db left the chat",
   "timestamp": 1710000000
 }
 ```
@@ -819,7 +776,7 @@ GET http://localhost:8080/ping
 ### Step 3: Seed sample manga
 
 ```http
-GET http://localhost:8080/seed
+GET http://localhost:8080/seed/manga
 ```
 
 ### Step 4: Register user
@@ -952,6 +909,51 @@ grpcurl -plaintext \
 ```json
 {
   "error": "invalid input"
+}
+```
+
+---
+
+## 12. HTTP Notification API (UDP Broadcast Helper)
+
+### 12.1 Broadcast Chapter Release Notification
+
+```http
+POST /notify/chapter
+```
+
+Full URL:
+
+```text
+http://localhost:8080/notify/chapter
+```
+
+Request body:
+
+```json
+{
+  "manga_id": "one-piece",
+  "message": "New chapter released"
+}
+```
+
+Notes:
+
+- `manga_id` is required.
+- If `message` is omitted, the server defaults it to `"New chapter released"`.
+
+Success response:
+
+```json
+{
+  "message": "chapter release notification sent",
+  "manga_id": "one-piece",
+  "notification": {
+    "type": "chapter_release",
+    "manga_id": "one-piece",
+    "message": "New chapter released",
+    "timestamp": 1710000000
+  }
 }
 ```
 

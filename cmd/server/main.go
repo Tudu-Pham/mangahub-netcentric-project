@@ -9,6 +9,7 @@ import (
 
 	"mangahub/internal/auth"
 	"mangahub/internal/manga"
+	"mangahub/internal/notification"
 	"mangahub/internal/tcp"
 	"mangahub/internal/udp"
 	"mangahub/internal/user"
@@ -34,7 +35,7 @@ func main() {
 	tcpServer := tcp.NewServer(":9090")
 	go tcpServer.Start()
 
-	wsServer := ws.NewServer()
+	wsServer := ws.NewServer(db)
 	wsServer.RegisterRoutes(r)
 	go wsServer.Run()
 
@@ -76,6 +77,9 @@ func main() {
 
 	udpServer := udp.NewServer(":7070")
 	go udpServer.Start()
+
+	notificationHandler := notification.NewHandler(udpServer)
+	notificationHandler.RegisterRoutes(r)
 
 	userHandler := user.NewHandler(db, tcpServer, udpServer)
 	userHandler.RegisterRoutes(r)

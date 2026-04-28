@@ -51,7 +51,8 @@ The server starts several services at the same time:
 
 - Clients connect to `/ws/chat`
 - Join, chat, and leave events are broadcast in real time
-- `user_id` and `username` can be passed as query parameters
+- Clients must provide a valid JWT via query string: `?token=<JWT_TOKEN>`
+- The server identifies the user from the token and looks up `username` from the database
 
 ### gRPC Service
 
@@ -175,6 +176,10 @@ Supported query parameters for `GET /manga`:
 - `GET /users/library`
 - `PUT /users/progress`
 
+### Notifications
+
+- `POST /notify/chapter` (broadcasts a UDP `chapter_release` notification)
+
 ## Sample Workflow
 
 1. Start the server.
@@ -184,7 +189,8 @@ Supported query parameters for `GET /manga`:
 5. Use the token to call `GET /me`.
 6. Add a manga to the library with `POST /users/library`.
 7. Update progress with `PUT /users/progress`.
-8. Observe related messages through TCP and UDP test clients.
+8. (Optional) Broadcast a chapter release via `POST /notify/chapter`.
+9. Observe related messages through TCP and UDP test clients.
 
 ## Test Utilities
 
