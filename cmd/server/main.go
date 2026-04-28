@@ -74,7 +74,7 @@ func main() {
 	authHandler.RegisterRoutes(r)
 
 	udpServer := udp.NewServer(":7070")
-	udpServer.Start()
+	go udpServer.Start()
 
 	userHandler := user.NewHandler(db, tcpServer, udpServer)
 	userHandler.RegisterRoutes(r)

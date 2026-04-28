@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 	"strings"
+	"time"
 
 	"mangahub/internal/auth"
 	"mangahub/internal/tcp"
@@ -300,13 +301,14 @@ func (h *Handler) UpdateProgress(c *gin.Context) {
 
 	h.TCPServer.BroadcastCh <- tcp.NewProgressUpdate(userID, req.MangaID, req.CurrentChapter)
 
-	h.UDPServer.SendNotification(
-		udp.Notification{
-			Type:    "progress_update",
-			Message: "User updated reading progress",
-		},
-		"127.0.0.1:9999",
-	)
+	if h.UDPServer != nil {
+		h.UDPServer.Broadcast(udp.Notification{
+			Type:      "progress_update",
+			MangaID:   req.MangaID,
+			Message:   "User updated reading progress",
+			Timestamp: time.Now().Unix(),
+		})
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"message":         "progress updated",
