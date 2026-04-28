@@ -8,13 +8,14 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"mangahub/internal/auth"
-	"mangahub/internal/grpc"
 	"mangahub/internal/manga"
 	"mangahub/internal/tcp"
 	"mangahub/internal/udp"
 	"mangahub/internal/user"
 	ws "mangahub/internal/websocket"
 	"mangahub/pkg/database"
+
+	grpcserver "mangahub/internal/grpc"
 )
 
 func main() {
@@ -79,7 +80,7 @@ func main() {
 	userHandler := user.NewHandler(db, tcpServer, udpServer)
 	userHandler.RegisterRoutes(r)
 
-	grpcServer := grpc.NewServer(db)
+	grpcServer := grpcserver.NewServer(db, tcpServer)
 	go grpcServer.Start()
 
 	r.GET("/me", auth.AuthMiddleware(), func(c *gin.Context) {

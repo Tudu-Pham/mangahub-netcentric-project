@@ -7,6 +7,7 @@ option go_package = "mangahub/proto;mangahubpb";
 service MangaService {
   rpc GetManga(GetMangaRequest) returns (MangaResponse);
   rpc SearchManga(SearchMangaRequest) returns (SearchMangaResponse);
+  rpc UpdateProgress(UpdateProgressRequest) returns (UpdateProgressResponse);
 }
 
 message GetMangaRequest {
@@ -33,4 +34,21 @@ message MangaResponse {
 
 message SearchMangaResponse {
   repeated Manga results = 1;
+}
+
+
+message UpdateProgressRequest {
+  string user_id = 1;
+  string manga_id = 2;
+  int32 current_chapter = 3;
+  string status = 4;
+}
+
+message UpdateProgressResponse {
+  bool success = 1;
+  string message = 2;
+  string user_id = 3;
+  string manga_id = 4;
+  int32 current_chapter = 5;
+  string status = 6;
 }
