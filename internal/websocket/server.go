@@ -10,24 +10,32 @@ import (
 )
 
 type ChatMessage struct {
+	Type      string `json:"type"`
+	UserID    string `json:"user_id"`
 	Username  string `json:"username"`
 	Message   string `json:"message"`
 	Timestamp int64  `json:"timestamp"`
 }
 
+type Client struct {
+	Conn     *websocket.Conn
+	UserID   string
+	Username string
+}
+
 type Server struct {
-	clients    map[*websocket.Conn]bool
+	clients    map[*websocket.Conn]*Client
 	broadcast  chan ChatMessage
-	register   chan *websocket.Conn
-	unregister chan *websocket.Conn
+	register   chan *Client
+	unregister chan *Client
 }
 
 func NewServer() *Server {
 	return &Server{
-		clients:    make(map[*websocket.Conn]bool),
-		broadcast:  make(chan ChatMessage),
-		register:   make(chan *websocket.Conn),
-		unregister: make(chan *websocket.Conn),
+		clients:    make(map[*websocket.Conn]*Client),
+		broadcast:  make(chan ChatMessage, 100),
+		register:   make(chan *Client),
+		unregister: make(chan *Client),
 	}
 }
 
@@ -44,15 +52,31 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 func (s *Server) Run() {
 	for {
 		select {
-		case conn := <-s.register:
-			s.clients[conn] = true
-			log.Println("WebSocket client connected")
+		case client := <-s.register:
+			s.clients[client.Conn] = client
+			log.Println("WebSocket client connected:", client.Username)
 
-		case conn := <-s.unregister:
-			if _, ok := s.clients[conn]; ok {
-				delete(s.clients, conn)
-				conn.Close()
-				log.Println("WebSocket client disconnected")
+			s.broadcast <- ChatMessage{
+				Type:      "join",
+				UserID:    client.UserID,
+				Username:  client.Username,
+				Message:   client.Username + " joined the chat",
+				Timestamp: time.Now().Unix(),
+			}
+
+		case client := <-s.unregister:
+			if _, ok := s.clients[client.Conn]; ok {
+				delete(s.clients, client.Conn)
+				client.Conn.Close()
+				log.Println("WebSocket client disconnected:", client.Username)
+
+				s.broadcast <- ChatMessage{
+					Type:      "left",
+					UserID:    client.UserID,
+					Username:  client.Username,
+					Message:   client.Username + " left the chat",
+					Timestamp: time.Now().Unix(),
+				}
 			}
 
 		case msg := <-s.broadcast:
@@ -75,22 +99,50 @@ func (s *Server) HandleConnection(c *gin.Context) {
 		return
 	}
 
-	s.register <- conn
+	userID := c.Query("user_id")
+	username := c.Query("username")
+
+	if userID == "" {
+		userID = "guest"
+	}
+
+	if username == "" {
+		username = "Anonymous"
+	}
+
+	client := &Client{
+		Conn:     conn,
+		UserID:   userID,
+		Username: username,
+	}
+
+	s.register <- client
 
 	defer func() {
-		s.unregister <- conn
+		s.unregister <- client
 	}()
 
 	for {
-		var msg ChatMessage
+		var input struct {
+			Message string `json:"message"`
+		}
 
-		err := conn.ReadJSON(&msg)
+		err := conn.ReadJSON(&input)
 		if err != nil {
 			log.Println("WebSocket read error:", err)
 			break
 		}
 
-		msg.Timestamp = time.Now().Unix()
-		s.broadcast <- msg
+		if input.Message == "" {
+			continue
+		}
+
+		s.broadcast <- ChatMessage{
+			Type:      "chat",
+			UserID:    client.UserID,
+			Username:  client.Username,
+			Message:   input.Message,
+			Timestamp: time.Now().Unix(),
+		}
 	}
 }
