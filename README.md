@@ -180,7 +180,7 @@ Supported query parameters for `GET /manga`:
 
 - `POST /notify/chapter` (broadcasts a UDP `chapter_release` notification)
 
-## Sample Workflow
+## Workflow 
 
 1. Start the server.
 2. Seed sample data with `GET /seed/manga`.
@@ -226,6 +226,7 @@ Additional project documents are available in:
 
 - `docs/api.md` for detailed endpoint and protocol documentation
 - `docs/demo.md` for a step-by-step demonstration guide
+- `docs/architecture.md` for an overview of the system architecture
 
 ## Current Limitations
 
