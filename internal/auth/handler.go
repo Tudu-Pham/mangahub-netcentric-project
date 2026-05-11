@@ -34,12 +34,10 @@ func (h *Handler) Register(c *gin.Context) {
 		return
 	}
 
-	// Xóa khoảng trắng đầu/cuối
 	req.Username = strings.TrimSpace(req.Username)
 	req.Email = strings.TrimSpace(req.Email)
 	req.Password = strings.TrimSpace(req.Password)
 
-	// Validate username/email/password rỗng
 	if req.Username == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "username is required"})
 		return
@@ -55,7 +53,6 @@ func (h *Handler) Register(c *gin.Context) {
 		return
 	}
 
-	// Validate đơn giản cho password
 	if len(req.Password) < 6 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "password must be at least 6 characters"})
 		return
